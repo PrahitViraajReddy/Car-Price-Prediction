@@ -1,4 +1,4 @@
-# CodeAlpha_Car-Price-Prediction-
+# Car-Price-Prediction-
 ## Overview
 
 This project predicts the selling price of used cars using Machine Learning techniques. Various regression algorithms were trained and evaluated to estimate a car's selling price based on factors such as present price, age, kilometers driven, fuel type, transmission type, seller type, and ownership history.
