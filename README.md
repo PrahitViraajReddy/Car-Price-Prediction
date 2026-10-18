@@ -8,7 +8,7 @@ A regression-based machine learning project that estimates used-car selling pric
 
 <br/>
 
-![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
 ![Scikit-learn](https://img.shields.io/badge/Scikit--learn-Machine%20Learning-F7931E?logo=scikitlearn&logoColor=white)
 ![Pandas](https://img.shields.io/badge/Pandas-Data%20Analysis-150458?logo=pandas&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-Web%20App-FF4B4B?logo=streamlit&logoColor=white)
@@ -154,6 +154,8 @@ The app accepts vehicle information and returns an estimated selling price in la
 
 ### Run locally
 
+**Python version:** Python 3.14
+
 1. Clone the repository and move into the project directory:
 
    ```bash
@@ -197,7 +199,7 @@ The app accepts vehicle information and returns an estimated selling price in la
 
 ## 🧰 Technology Stack
 
-- **Language:** Python
+- **Language:** Python 3.14
 - **Data processing:** Pandas, NumPy
 - **Visualisation:** Matplotlib, Seaborn
 - **Machine learning:** Scikit-learn, LightGBM
