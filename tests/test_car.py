@@ -58,3 +58,36 @@ def test_pipeline_ignores_unseen_categories():
     }))
     assert len(prediction) == 1
     assert pd.notna(prediction[0])
+
+
+
+def test_fractional_owner_count_is_rejected(tmp_path):
+    source = tmp_path / "fractional_owner.csv"
+    pd.DataFrame({
+        "Year": [2020, 2021, 2019, 2018, 2022],
+        "Present_Price": [5.0] * 5,
+        "Driven_kms": [10000] * 5,
+        "Owner": [0, 1, 1.5, 2, 0],
+        "Fuel_Type": ["Petrol"] * 5,
+        "Selling_type": ["Dealer"] * 5,
+        "Transmission": ["Manual"] * 5,
+        "Selling_Price": [4.0] * 5,
+    }).to_csv(source, index=False)
+    with pytest.raises(ValueError, match="whole numbers"):
+        car.load_data(source)
+
+
+def test_infinite_numeric_values_are_treated_as_missing(tmp_path):
+    source = tmp_path / "infinite_values.csv"
+    pd.DataFrame({
+        "Year": [2020, 2021, 2019, 2018, 2022],
+        "Present_Price": [5.0, 6.0, float("inf"), 8.0, 9.0],
+        "Driven_kms": [10000, 12000, 15000, 18000, 20000],
+        "Owner": [0, 1, 0, 2, 0],
+        "Fuel_Type": ["Petrol"] * 5,
+        "Selling_type": ["Dealer"] * 5,
+        "Transmission": ["Manual"] * 5,
+        "Selling_Price": [4.0, 5.0, 3.0, 6.0, 7.0],
+    }).to_csv(source, index=False)
+    result = car.load_data(source)
+    assert len(result) == 4
