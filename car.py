@@ -53,8 +53,6 @@ def load_data(path: Path = DATA_PATH) -> pd.DataFrame:
     df = df.dropna(subset=numeric_columns + CATEGORICAL_FEATURES)
     if df.empty:
         raise ValueError("No valid rows remain after validating numeric and categorical fields.")
-    if len(df) < 5:
-        raise ValueError(f"Need at least 5 valid rows for the configured five-fold cross-validation; found {len(df)}.")
     if (df[TARGET] < 0).any() or (df["Present_Price"] < 0).any() or (df["Driven_kms"] < 0).any():
         raise ValueError("Prices and driven kilometres must not be negative.")
     if (df["Year"] <= 0).any() or (df["Owner"] < 0).any():
@@ -87,6 +85,8 @@ def build_model() -> Pipeline:
 
 def main() -> None:
     df = load_data()
+    if len(df) < 5:
+        raise ValueError(f"Need at least 5 valid rows for the configured five-fold cross-validation; found {len(df)}.")
     X = df.drop(columns=[TARGET])
     y = df[TARGET]
     X_train, X_test, y_train, y_test = train_test_split(
