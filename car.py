@@ -48,11 +48,25 @@ def load_data(path: Path = DATA_PATH) -> pd.DataFrame:
     df = df.drop_duplicates().copy()
     for col in ["Year", "Present_Price", "Driven_kms", "Owner", TARGET]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
-    df = df.dropna(subset=list(required - {"Fuel_Type", "Selling_type", "Transmission"}))
+    numeric_columns = ["Year", "Present_Price", "Driven_kms", "Owner", TARGET]
+    df = df.replace([np.inf, -np.inf], np.nan)
+    df = df.dropna(subset=numeric_columns + CATEGORICAL_FEATURES)
     if df.empty:
-        raise ValueError("No valid rows remain after validating numeric fields.")
+        raise ValueError("No valid rows remain after validating numeric and categorical fields.")
+    if len(df) < 5:
+        raise ValueError(f"Need at least 5 valid rows for the configured five-fold cross-validation; found {len(df)}.")
     if (df[TARGET] < 0).any() or (df["Present_Price"] < 0).any() or (df["Driven_kms"] < 0).any():
         raise ValueError("Prices and driven kilometres must not be negative.")
+    if (df["Year"] <= 0).any() or (df["Owner"] < 0).any():
+        raise ValueError("Manufacturing years must be positive and owner counts must not be negative.")
+    if not np.equal(df["Year"], np.floor(df["Year"])).all():
+        raise ValueError("Manufacturing years must be whole numbers.")
+    if not np.equal(df["Owner"], np.floor(df["Owner"])).all():
+        raise ValueError("Previous-owner counts must be whole numbers.")
+    for col in CATEGORICAL_FEATURES:
+        df[col] = df[col].astype(str).str.strip()
+        if df[col].eq("").any():
+            raise ValueError(f"Column {col!r} contains blank category values.")
     df["Car_Age"] = (REFERENCE_YEAR - df["Year"]).clip(lower=0)
     return df.drop(columns=["Car_Name", "Year"], errors="ignore")
 
