@@ -57,6 +57,8 @@ def load_data(path: Path = DATA_PATH) -> pd.DataFrame:
         raise ValueError("Prices and driven kilometres must not be negative.")
     if (df["Year"] <= 0).any() or (df["Owner"] < 0).any():
         raise ValueError("Manufacturing years must be positive and owner counts must not be negative.")
+    if (df["Year"] > REFERENCE_YEAR).any():
+        raise ValueError(f"Manufacturing year cannot exceed the configured reference year ({REFERENCE_YEAR}).")
     if not np.equal(df["Year"], np.floor(df["Year"])).all():
         raise ValueError("Manufacturing years must be whole numbers.")
     if not np.equal(df["Owner"], np.floor(df["Owner"])).all():
