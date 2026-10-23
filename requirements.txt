@@ -1,1 +1,8 @@
-pandas\nnumpy\nmatplotlib\nseaborn\nscikit-learn\njoblib\nstreamlit\npytest\n
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+joblib
+streamlit
+pytest
