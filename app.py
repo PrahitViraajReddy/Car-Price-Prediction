@@ -7,42 +7,30 @@ import pandas as pd
 import streamlit as st
 
 MODEL_PATH = Path("car_price_model.pkl")
-CURRENT_FEATURES = [
-    "Present_Price", "Driven_kms", "Owner", "Car_Age",
-    "Fuel_Type", "Selling_type", "Transmission",
-]
+CURRENT_FEATURES = ["Present_Price", "Driven_kms", "Owner", "Car_Age", "Fuel_Type", "Selling_type", "Transmission"]
 
 
 @st.cache_resource
 def load_model_bundle():
     if not MODEL_PATH.is_file():
-        raise FileNotFoundError(
-            "car_price_model.pkl is missing. Make sure the model file is included in the deployment, "
-            "or run 'python car.py' from the project root to train it."
-        )
-
+        raise FileNotFoundError("car_price_model.pkl is missing. Ensure the model file is included in deployment, or run 'python car.py' from the project root.")
     artifact = joblib.load(MODEL_PATH)
     if isinstance(artifact, dict) and "model" in artifact:
         bundle = artifact
     else:
-        # Older versions saved the sklearn estimator directly.
         bundle = {"model": artifact, "reference_year": None, "legacy_model": True}
-
     model = bundle["model"]
     if not hasattr(model, "predict"):
         raise ValueError("car_price_model.pkl does not contain a usable prediction model. Retrain it with car.py.")
-
     bundle.setdefault("legacy_model", False)
     bundle.setdefault("reference_year", None)
     return bundle
 
 
 def expected_feature_names(model):
-    """Return input column names when the estimator exposes them."""
     names = getattr(model, "feature_names_in_", None)
     if names is not None:
         return list(names)
-    # A Pipeline may expose the schema on its first preprocessing step.
     for step in getattr(model, "named_steps", {}).values():
         names = getattr(step, "feature_names_in_", None)
         if names is not None:
@@ -81,29 +69,21 @@ with right:
 
 if st.button("Predict Price", type="primary", use_container_width=True):
     features = pd.DataFrame({
-        "Present_Price": [present_price],
-        "Driven_kms": [driven_kms],
-        "Owner": [owner],
-        "Car_Age": [car_age],
-        "Fuel_Type": [fuel_type],
-        "Selling_type": [selling_type],
+        "Present_Price": [present_price], "Driven_kms": [driven_kms], "Owner": [owner],
+        "Car_Age": [car_age], "Fuel_Type": [fuel_type], "Selling_type": [selling_type],
         "Transmission": [transmission],
     })
-
-    # Adapt legacy models that were trained with manufacturing Year instead of Car_Age.
     expected = expected_feature_names(model)
     if expected and "Year" in expected and "Car_Age" not in expected:
-        effective_reference_year = reference_year or date.today().year
-        features["Year"] = effective_reference_year - features["Car_Age"]
+        features["Year"] = (reference_year or date.today().year) - features["Car_Age"]
         features = features.drop(columns=["Car_Age"])
-    elif expected and set(expected) != set(CURRENT_FEATURES):
-        st.error(
-            "The saved model expects a different set of input columns than this app provides. "
-            "Please retrain the model with the current car.py and redeploy car_price_model.pkl."
-        )
-        st.stop()
 
     if expected:
+        missing = [column for column in expected if column not in features.columns]
+        extra = [column for column in features.columns if column not in expected]
+        if missing or extra:
+            st.error(f"The saved model expects a different input schema (missing: {missing}; extra: {extra}). Retrain with the current car.py and redeploy car_price_model.pkl.")
+            st.stop()
         features = features[expected]
 
     try:
