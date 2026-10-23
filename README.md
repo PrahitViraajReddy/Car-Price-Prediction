@@ -1,48 +1,196 @@
-# Car Price Prediction
+# 🚗 Car Price Prediction
 
-A supervised machine-learning project that estimates used-car resale prices from vehicle attributes. The Streamlit interface consumes a saved scikit-learn pipeline trained by `car.py`.
+**A supervised machine-learning application that estimates used-car resale prices from vehicle attributes.**
+
+<p>
+  <img alt="Python" src="https://img.shields.io/badge/Python-3.x-3776AB?style=flat-square&logo=python&logoColor=white">
+  <img alt="Machine Learning" src="https://img.shields.io/badge/ML-Decision%20Tree-orange?style=flat-square">
+  <img alt="scikit-learn" src="https://img.shields.io/badge/Library-scikit--learn-F7931E?style=flat-square&logo=scikitlearn&logoColor=white">
+  <img alt="Streamlit" src="https://img.shields.io/badge/App-Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white">
+</p>
+
+**[View the source code](https://github.com/PrahitViraajReddy/Car-Price-Prediction)**
+
+---
+
+## What is Car Price Prediction?
+
+Car Price Prediction is a machine-learning project that estimates a used car's resale price from its vehicle details. It combines data validation, preprocessing, model training and evaluation, and a Streamlit interface for entering vehicle attributes and viewing a prediction.
+
+The output is an estimate learned from the training data, not a guaranteed market valuation or a substitute for a professional vehicle inspection.
+
+## Features
+
+- **Vehicle price estimation** — predict an estimated resale price from selected vehicle attributes.
+- **Data validation** — check required columns and numeric values before training.
+- **Preprocessing pipeline** — scale numerical inputs and one-hot encode categorical features.
+- **Decision Tree regression** — train a bounded-depth Decision Tree Regressor.
+- **Model evaluation** — report R², MAE, RMSE, and cross-validation R².
+- **Feature importance** — inspect Decision Tree feature importance.
+- **Prediction visualization** — compare actual and predicted prices on held-out test data.
+- **Interactive interface** — use the Streamlit application to submit vehicle details.
+
+## How it works
+
+```text
+Used-car dataset
+       │
+       ▼
+Data validation and duplicate handling
+       │
+       ▼
+Train/test split
+       │
+       ▼
+Preprocessing pipeline
+(numerical scaling + one-hot encoding)
+       │
+       ▼
+Decision Tree Regressor
+       │
+       ├──────────────► Evaluation metrics and plots
+       │
+       └──────────────► Saved model pipeline
+                              │
+                              ▼
+                       Streamlit application
+                              │
+                              ▼
+                       Estimated car price
+```
+
+The preprocessing pipeline is fitted using training data to reduce data leakage. The application uses the saved scikit-learn pipeline produced by the training script.
+
+## Prediction inputs
+
+The model uses these vehicle attributes:
+
+| Input | Description |
+|---|---|
+| Present showroom price | Current showroom price, in lakhs |
+| Kilometres driven | Distance driven by the car |
+| Previous owners | Number of previous owners |
+| Car age | Age of the car, in years |
+| Fuel type | Fuel category |
+| Seller type | Individual or dealer category represented by the dataset |
+| Transmission | Transmission category |
+
+Predictions depend on the training data and the values provided. Unusual or out-of-range inputs may produce less reliable estimates.
+
+## Machine learning and evaluation
+
+**Model:** Decision Tree Regressor with a maximum depth of five and a fixed random seed.
+
+The training workflow removes duplicate records, validates required columns and numeric fields, splits the data, and fits numerical scaling and categorical encoding within the training pipeline.
+
+Evaluation includes:
+
+| Metric | What it measures |
+|---|---|
+| Training R² | Fit on the training data |
+| Test R² | Explained variance on held-out data |
+| MAE | Mean absolute prediction error |
+| RMSE | Root mean squared prediction error |
+| Cross-validation R² | Performance across five validation folds |
+
+Price errors are expressed in the dataset's price units (lakhs). Metrics are not hard-coded here; run the training script to calculate them for the current dataset and configuration.
+
+The project also generates feature-importance and actual-versus-predicted visualizations. Feature importance is specific to the fitted Decision Tree and should not be interpreted as a causal effect.
+
+## Technology stack
+
+| Layer | Technologies |
+|---|---|
+| Language | Python |
+| Data processing | Pandas, NumPy |
+| Machine learning | scikit-learn |
+| Regression model | Decision Tree Regressor |
+| Preprocessing | Numerical scaling, one-hot encoding |
+| Evaluation | R², MAE, RMSE, cross-validation |
+| Web interface | Streamlit |
+| Visualization | Matplotlib |
 
 ## Run locally
 
+### 1. Clone the repository
+
 ```bash
-python -m pip install -r requirements.txt
-python car.py
-streamlit run app.py
+git clone https://github.com/PrahitViraajReddy/Car-Price-Prediction.git
+cd Car-Price-Prediction
 ```
 
-Place `car data.csv` in the repository root. Training stops with a clear error if the dataset is missing or required columns are absent.
+### 2. Prepare the dataset
 
-To use a specific manufacturing-year reference when creating `Car_Age`, set `CAR_REFERENCE_YEAR` before training. The default is the current calendar year at training time. The saved artifact records the chosen reference year; the app takes car age as a direct input and does not silently recompute it.
+Place `car data.csv` in the repository root. Training requires the dataset and the expected columns; it stops with a clear error if the data is missing or the required columns are absent.
 
-Windows PowerShell example:
+### 3. Install dependencies
 
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+### 4. Train the model
+
+```bash
+python car.py
+```
+
+To set the manufacturing-year reference used to create `Car_Age`, configure `CAR_REFERENCE_YEAR` before training.
+
+**Windows PowerShell**
 ```powershell
 $env:CAR_REFERENCE_YEAR = "2026"
 python car.py
 ```
 
-## Workflow and evaluation
+The default reference year is the current calendar year at training time. The saved artifact records the chosen reference year; the app accepts car age directly and does not silently recalculate it.
 
-The script removes duplicate records, validates required columns and numeric fields, then splits the data before fitting the preprocessing pipeline. Numerical scaling and one-hot encoding are fitted only on training folds. The estimator is a Decision Tree Regressor with a fixed random seed and maximum depth of five.
+### 5. Launch the application
 
-The script prints training R², held-out test R², test MAE and RMSE (price units are lakhs), and five-fold cross-validation R². Run the script on the committed dataset to obtain the current metrics; scores are intentionally not hard-coded here because they depend on the exact data and training configuration.
+```bash
+streamlit run app.py
+```
 
-Feature importance is labelled as Decision Tree feature importance, not a linear-regression coefficient. The actual-versus-predicted chart sorts test rows by actual price and applies the same ordering to predictions.
-
-## Inputs
-
-- Present showroom price (lakhs)
-- Kilometres driven
-- Number of previous owners
-- Car age in years
-- Fuel type
-- Seller type
-- Transmission
-
-Predictions are estimates based on the training data, not guaranteed market valuations.
-
-## Tests
+### 6. Run tests
 
 ```bash
 python -m pytest -q
 ```
+
+## Repository structure
+
+```text
+Car-Price-Prediction/
+├── app.py
+├── car.py
+├── requirements.txt
+├── car data.csv
+└── README.md
+```
+
+This is a high-level overview; generated model artifacts, tests, and additional files may also be present in the repository.
+
+## Engineering highlights
+
+- Data validation and duplicate handling
+- Train/test separation before fitting preprocessing
+- Reusable scikit-learn preprocessing and prediction pipeline
+- Regression evaluation with multiple metrics
+- Feature-importance and actual-versus-predicted plots
+- Explicit manufacturing-year reference for car-age construction
+- Interactive model inference through Streamlit
+
+## Links
+
+- **GitHub repository:** https://github.com/PrahitViraajReddy/Car-Price-Prediction
+- **Author:** [Madupu Prahit Viraaj Reddy](https://github.com/PrahitViraajReddy)
+- **LinkedIn:** [Prahit Viraaj Reddy](https://www.linkedin.com/in/prahit-viraaj-reddy-madupu-5169332ba/)
+
+---
+
+<div align="center">
+
+Built with Python, pandas, and scikit-learn.
+
+</div>
