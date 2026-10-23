@@ -183,6 +183,7 @@ This is a high-level overview; generated model artifacts, tests, and additional 
 
 ## Links
 
+- **Live app:** https://car-price-prediction-jxco5kdfo4uqgcxyeu7ack.streamlit.app/
 - **GitHub repository:** https://github.com/PrahitViraajReddy/Car-Price-Prediction
 - **Author:** [Madupu Prahit Viraaj Reddy](https://github.com/PrahitViraajReddy)
 - **LinkedIn:** [Prahit Viraaj Reddy](https://www.linkedin.com/in/prahit-viraaj-reddy-madupu-5169332ba/)
